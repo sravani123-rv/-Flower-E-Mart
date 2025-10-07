@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact - Flower E-Mart</title>
+  <style>
+    body{margin:0;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Arial;color:#111}
+    .wrap{max-width:700px;margin:2rem auto;padding:1rem}
+    label{display:block;margin:.5rem 0 0.25rem}
+    input,textarea{width:100%;padding:.5rem;border:1px solid #ddd;border-radius:6px}
+    button{margin-top:.75rem;padding:.6rem 1rem;background:#ff6b6b;border:none;color:#fff;border-radius:6px}
+    .back{display:inline-block;margin-bottom:1rem;text-decoration:none;color:#ff6b6b}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← Back to Home</a>
+    <h1>Contact Us</h1>
+    <p>Have questions or need a custom order? Send us a message.</p>
+    <form action="#" onsubmit="alert('Demo: form submitted'); return false;">
+      <label for="name">Name</label>
+      <input id="name" name="name" required>
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required>
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="6" required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+    <section style="margin-top:1.25rem">
+      <h3>Visit Us</h3>
+      <p>123 Flower Lane, Blossom City</p>
+      <p>Email: hello@flower-emart.example</p>
+      <p>Phone: (555) 123-4567</p>
+    </section>
+  </div>
+</body>
+</html>

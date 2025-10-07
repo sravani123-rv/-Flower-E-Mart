@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shop Bouquets - Flower E-Mart</title>
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; padding:1rem; background:#fff; color:#111 }
+    .wrap { max-width:1000px; margin:0 auto; }
+    header { margin-bottom:1rem; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+    .card { border:1px solid #eee; border-radius:8px; overflow:hidden; }
+    .card img { width:100%; height:320px; object-fit:cover; display:block; }
+    .card .info { padding:.75rem; }
+    .back { display:inline-block; margin-bottom:1rem; text-decoration:none; color:#ff6b6b }
+    /* action buttons: stack with Buy Now above Add to Cart */
+    .actions { display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem; }
+    .actions button { padding:0.5rem 0.75rem; border-radius:6px; border:none; cursor:pointer; font-weight:600; }
+    .actions .buy-now { background:#ff6b6b; color:#fff; }
+    .actions .add-to-cart { background:#fff; color:#ff6b6b; border:1px solid #ff6b6b; }
+    @media(min-width:700px){ .actions { flex-direction:row; } .actions .add-to-cart{ order:2 } .actions .buy-now{ order:1 } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← Back to Home</a>
+    <header>
+      <h1>Shop Bouquets</h1>
+      <p>Choose a bouquet and click to view details (demo page).</p>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <img src="https://images.unsplash.com/photo-1572454591674-2739f30d8c40?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Zmxvd2VyJTIwYm91cXVldHxlbnwwfHwwfHx8MA%3D%3D" alt="Red roses bouquet">
+        <div class="info">
+          <h3>Red Romance</h3>
+          <p>$29.99</p>
+          <div class="actions">
+            <button class="buy-now" data-id="red-romance" data-name="Red Romance" data-price="29.99">Buy Now</button>
+            <button class="add-to-cart" data-id="red-romance" data-name="Red Romance" data-price="29.99">Add to Cart</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Zmxvd2VyJTIwYm91cXVldHxlbnwwfHwwfHx8MA%3D%3D" alt="Tulip bouquet">
+        <div class="info">
+          <h3>Spring Tulips</h3>
+          <p>$24.99</p>
+          <div class="actions">
+            <button class="buy-now" data-id="spring-tulips" data-name="Spring Tulips" data-price="24.99">Buy Now</button>
+            <button class="add-to-cart" data-id="spring-tulips" data-name="Spring Tulips" data-price="24.99">Add to Cart</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="https://images.unsplash.com/photo-1533616688419-b7a585564566?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGJvdXF1ZXR8ZW58MHx8MHx8fDA%3D" alt="Sunflower arrangement">
+        <div class="info">
+          <h3>Sunny Sunflowers</h3>
+          <p>$19.99</p>
+          <div class="actions">
+            <button class="buy-now" data-id="sunny-sunflowers" data-name="Sunny Sunflowers" data-price="19.99">Buy Now</button>
+            <button class="add-to-cart" data-id="sunny-sunflowers" data-name="Sunny Sunflowers" data-price="19.99">Add to Cart</button>
+          </div>
+        </div>
+      </article>
+
+    </section>
+  </div>
+  <script>
+    // Simple cart: store items in localStorage under 'emart_cart'
+    function readCart(){ try { return JSON.parse(localStorage.getItem('emart_cart')||'[]'); } catch(e){return []} }
+    function writeCart(c){ localStorage.setItem('emart_cart', JSON.stringify(c)); window.dispatchEvent(new Event('storage')); }
+
+    function addToCart(item){
+      const cart = readCart();
+      const existing = cart.find(i=>i.id===item.id);
+      if(existing){ existing.qty = (existing.qty||1)+1; }
+      else { cart.push({...item, qty:1}); }
+      writeCart(cart);
+      // Quick feedback
+      alert(item.name + ' added to cart');
+    }
+
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = { id: btn.dataset.id, name: btn.dataset.name, price: parseFloat(btn.dataset.price) };
+        addToCart(item);
+        // update navbar count if present
+        try{ const el = parent.document.getElementById('cartCount'); if(el) el.textContent = JSON.parse(localStorage.getItem('emart_cart')||'[]').reduce((s,i)=>s+(i.qty||1),0); } catch(e){}
+      });
+    });
+    // Buy Now: replace cart with single item and go to checkout
+    document.querySelectorAll('.buy-now').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = { id: btn.dataset.id, name: btn.dataset.name, price: parseFloat(btn.dataset.price), qty: 1 };
+        // replace cart with this item
+        localStorage.setItem('emart_cart', JSON.stringify([item]));
+        try{ const el = parent.document.getElementById('cartCount'); if(el) el.textContent = 1; } catch(e){}
+        // redirect to cart with checkout flag
+        window.location.href = 'cart.html?checkout=1';
+      });
+    });
+  </script>
+</body>
+</html>

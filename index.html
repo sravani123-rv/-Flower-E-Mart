@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Full Screen Image</title>
+        <style>
+            /* Reset body margin so the image truly fills the viewport */
+            html, body {
+                height: 100%;
+                margin: 0;
+            }
+            /* Fullscreen image using object-fit */
+            .fs-image {
+                width: 100vw;
+                height: 100vh;
+                display: block;
+                object-fit: cover;
+            }
+            /* Optional center overlay with a small button (hidden by default) */
+            .overlay {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                z-index: 2;
+            }
+            .overlay button {
+                padding: .4rem .6rem;
+                border-radius: 4px;
+                border: none;
+                background: rgba(255,255,255,0.85);
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Fullscreen hero with centered overlay text -->
+        <header class="site-nav">
+            <div class="nav-inner">
+                <div class="logo"><a href="brand.html">Flower E-Mart</a></div>
+                <nav>
+                    <a href="index.html">Home</a>
+                    <a href="shop.html">Shop</a>
+                    <a href="about.html">About</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="cart.html" class="cart-link" aria-label="View cart">Cart (<span id="cartCount">0</span>)</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="hero" role="main" aria-label="Flower hero">
+            <div class="hero-bg" id="heroBg" aria-hidden="true"></div>
+            <div class="hero-content">
+                <h1>Flower E-Mart — Beautiful blooms, delivered</h1>
+                <p class="lead">Fresh bouquets handcrafted daily. Fast delivery in your area. Perfect for every occasion.</p>
+                <p>
+                    <a class="cta" id="shopCta" href="shop.html">Shop Bouquets</a>
+                </p>
+            </div>
+        </main>
+
+    <!-- White preloader overlay (show while images load) -->
+    <div id="preloader" aria-hidden="true" style="position:fixed;inset:0;background:#fff;z-index:1000;transition:opacity .45s ease;">
+    </div>
+
+        <style>
+            /* Fullscreen hero layout */
+            /* Navigation */
+            .site-nav { position: fixed; top:0; left:0; right:0; z-index: 5; background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.15)); backdrop-filter: blur(4px); }
+            .site-nav .nav-inner { max-width: 1200px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; padding:.6rem 1rem; color:#fff; }
+            .site-nav .logo { font-weight:700; letter-spacing:.3px; }
+            .site-nav nav a { color: #fff; text-decoration:none; margin-left:1rem; opacity:0.95; }
+            .site-nav nav a:hover { opacity:1; text-decoration:underline; }
+            :root { --overlay-bg: rgba(0,0,0,0.45); }
+            html, body { height: 100%; margin: 0; }
+            .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+            /* push hero content down slightly so nav doesn't overlap too heavily on small screens */
+            .hero { padding-top: 3.5rem; box-sizing: border-box; }
+            .hero-bg {
+                position: absolute; inset: 0;
+                background-image: url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=2000&q=80');
+                background-position: center center; background-size: cover; filter: brightness(0.7);
+                z-index: 0;
+            }
+            .hero-content { position: relative; z-index: 2; color: #fff; text-align: center; padding: 1rem; max-width: 900px; }
+            .hero-content h1 { font-size: clamp(2rem, 4.5vw, 3.5rem); margin: 0 0 .5rem; line-height: 1.05; }
+            .hero-content .lead { font-size: clamp(1rem, 2.2vw, 1.25rem); margin: 0 0 1rem; opacity: 0.95; }
+            .cta { display: inline-block; background: #ff6b6b; color: white; padding: .75rem 1.25rem; border-radius: 6px; text-decoration: none; font-weight:600; }
+            .cta:focus, .cta:hover { background: #ff5252; }
+            /* Carousel controls */
+            .carousel-controls { position: absolute; left: 1rem; bottom: 1rem; z-index: 3; display:flex; gap:.5rem; }
+            .carousel-controls button { background: rgba(255,255,255,0.85); border: none; padding:.5rem .65rem; border-radius:4px; cursor:pointer; }
+            @media (max-width:600px) {
+                .hero-content { padding: 1.5rem; }
+                .site-nav .nav-inner { padding:.6rem .75rem; }
+                .site-nav nav a { margin-left:.6rem; font-size:.95rem; }
+            }
+        </style>
+        <!-- Carousel controls + image switching script -->
+        <div class="carousel-controls" aria-hidden="false">
+            <button id="prevBtn" aria-label="Previous image">◀</button>
+            <button id="nextBtn" aria-label="Next image">▶</button>
+        </div>
+        <script>
+            (function(){
+                const images = [
+                    'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=2000&q=80',
+                    'https://images.unsplash.com/photo-1524594154909-ec1b6f6b5bda?auto=format&fit=crop&w=2000&q=80',
+                    'https://images.unsplash.com/photo-1464965911861-746a04b4bca5?auto=format&fit=crop&w=2000&q=80'
+                ];
+                let idx = 0;
+                const heroBg = document.getElementById('heroBg');
+                const prev = document.getElementById('prevBtn');
+                const next = document.getElementById('nextBtn');
+                const preloader = document.getElementById('preloader');
+
+                function apply() {
+                    heroBg.style.backgroundImage = `url('${images[idx]}')`;
+                }
+                function nextImg() { idx = (idx + 1) % images.length; apply(); }
+                function prevImg() { idx = (idx - 1 + images.length) % images.length; apply(); }
+
+                prev.addEventListener('click', () => { prevImg(); resetTimer(); });
+                next.addEventListener('click', () => { nextImg(); resetTimer(); });
+
+                // Auto-advance every 6s
+                let timer = setInterval(nextImg, 6000);
+                function resetTimer() { clearInterval(timer); timer = setInterval(nextImg, 6000); }
+
+                // Preload images and hide preloader when ready (or timeout)
+                let loaded = 0;
+                const maxWait = 2500; // ms
+                const to = setTimeout(hidePreloader, maxWait);
+
+                images.forEach(src => {
+                    const img = new Image();
+                    img.onload = () => {
+                        loaded++;
+                        if (loaded === images.length) {
+                            clearTimeout(to);
+                            hidePreloader();
+                        }
+                    };
+                    img.onerror = () => {
+                        loaded++;
+                        if (loaded === images.length) {
+                            clearTimeout(to);
+                            hidePreloader();
+                        }
+                    };
+                    img.src = src;
+                });
+
+                function hidePreloader() {
+                    if (!preloader) return;
+                    preloader.style.opacity = '0';
+                    setTimeout(() => { preloader.style.display = 'none'; }, 480);
+                    // Initialize background after preloader hidden
+                    apply();
+                }
+
+                // Initialize with first image (after preloading begins)
+                // apply() will be called from hidePreloader
+            })();
+        </script>
+        <script>
+            // Update cart count in navbar from localStorage
+            function updateCartCount() {
+                try {
+                    const cart = JSON.parse(localStorage.getItem('emart_cart') || '[]');
+                    const count = cart.reduce((s,i) => s + (i.qty||1), 0);
+                    const el = document.getElementById('cartCount');
+                    if (el) el.textContent = count;
+                } catch (e) { console.error(e); }
+            }
+            // Listen for storage changes from other tabs
+            window.addEventListener('storage', updateCartCount);
+            // Init on load
+            document.addEventListener('DOMContentLoaded', updateCartCount);
+        </script>
+    </body>
+</html>
+

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Cart - Flower E-Mart</title>
+  <style>
+    body{font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Arial;margin:0;padding:1rem;color:#111}
+    .wrap{max-width:900px;margin:0 auto}
+    .cart-item{display:flex;gap:1rem;border-bottom:1px solid #eee;padding:.75rem 0;align-items:center}
+    .cart-item img{width:96px;height:72px;object-fit:cover;border-radius:6px}
+    .qty{display:flex;gap:.5rem;align-items:center}
+    button{padding:.4rem .6rem;border-radius:6px;border:none;background:#ff6b6b;color:#fff;cursor:pointer}
+    .back{display:inline-block;margin-bottom:1rem;text-decoration:none;color:#ff6b6b}
+    .remove{background:#eee;color:#333}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← Continue shopping</a>
+    <h1>Your Cart</h1>
+    <div id="cartList"></div>
+    <div style="margin-top:1rem">
+      <strong>Total: $<span id="cartTotal">0.00</span></strong>
+    </div>
+    <div id="checkoutArea" style="margin-top:1.25rem;display:none">
+      <h2>Checkout</h2>
+      <form id="checkoutForm">
+        <label>Name<br><input name="name" required></label><br>
+        <label>Email<br><input name="email" type="email" required></label><br>
+        <label>Address<br><textarea name="address" rows="3" required></textarea></label><br>
+        <button type="submit">Place Order</button>
+      </form>
+      <div id="orderResult" style="margin-top:1rem"></div>
+    </div>
+  </div>
+
+  <script>
+    function readCart(){ try { return JSON.parse(localStorage.getItem('emart_cart')||'[]'); } catch(e){return []} }
+    function writeCart(c){ localStorage.setItem('emart_cart', JSON.stringify(c)); window.dispatchEvent(new Event('storage')); }
+
+    function render(){
+      const list = document.getElementById('cartList');
+      const cart = readCart();
+      list.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        const row = document.createElement('div'); row.className='cart-item';
+        const img = document.createElement('img');
+        // Try to map id -> image used in shop; fallback to placeholder
+        const map = {
+          'red-romance':'https://images.unsplash.com/photo-1572454591674-2739f30d8c40?w=500&auto=format&fit=crop&q=60',
+          'spring-tulips':'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=500&auto=format&fit=crop&q=60',
+          'sunny-sunflowers':'https://images.unsplash.com/photo-1533616688419-b7a585564566?w=500&auto=format&fit=crop&q=60'
+        };
+        img.src = map[item.id] || '';
+        img.alt = item.name;
+        const info = document.createElement('div'); info.style.flex='1';
+        info.innerHTML = `<div><strong>${item.name}</strong></div><div>$${(item.price||0).toFixed(2)}</div>`;
+        const controls = document.createElement('div'); controls.className='qty';
+        const minus = document.createElement('button'); minus.textContent='-';
+        const qty = document.createElement('span'); qty.textContent = item.qty||1;
+        const plus = document.createElement('button'); plus.textContent='+';
+        const remove = document.createElement('button'); remove.textContent='Remove'; remove.className='remove';
+
+        minus.addEventListener('click', ()=>{
+          if(item.qty>1){ item.qty--; write(); } else { removeItem(item.id); }
+        });
+        plus.addEventListener('click', ()=>{ item.qty = (item.qty||1)+1; write(); });
+        remove.addEventListener('click', ()=>{ removeItem(item.id); });
+
+        controls.appendChild(minus); controls.appendChild(qty); controls.appendChild(plus); controls.appendChild(remove);
+        row.appendChild(img); row.appendChild(info); row.appendChild(controls);
+        list.appendChild(row);
+
+        total += (item.qty||1) * (item.price||0);
+
+        function write(){
+          const c = readCart();
+          const found = c.find(i=>i.id===item.id);
+          if(found){ found.qty = item.qty; }
+          writeCart(c);
+          render();
+        }
+      });
+
+      document.getElementById('cartTotal').textContent = total.toFixed(2);
+      // update navbar count if present
+      try{ const el = parent.document.getElementById('cartCount'); if(el) el.textContent = readCart().reduce((s,i)=>s+(i.qty||1),0); } catch(e){}
+    }
+
+    function removeItem(id){
+      const c = readCart().filter(i=>i.id!==id);
+      writeCart(c); render();
+    }
+
+    // init
+    render();
+
+    // show checkout form if ?checkout=1 is present
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === '1') {
+      document.getElementById('checkoutArea').style.display = '';
+    }
+
+    // handle checkout submission (simulated)
+    const checkoutForm = document.getElementById('checkoutForm');
+    if (checkoutForm) {
+      checkoutForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = new FormData(checkoutForm);
+        // Simulate processing
+        const result = document.getElementById('orderResult');
+        result.textContent = 'Processing order...';
+        setTimeout(() => {
+          // clear cart
+          writeCart([]);
+          render();
+          result.innerHTML = '<strong>Order placed!</strong> Thank you — we\'ll email confirmation shortly.';
+        }, 1200);
+      });
+    }
+  </script>
+</body>
+</html>
